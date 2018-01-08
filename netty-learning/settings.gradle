@@ -1,0 +1,6 @@
+rootProject.name = "learning-netty"
+include "common"
+include "echo-server"
+include "echo-client"
+include "joke-proxy"
+

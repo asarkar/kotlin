@@ -1,0 +1,82 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(
+                "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
+                "io.spring.gradle:dependency-management-plugin:$dependencyManagementPluginVersion"
+        )
+    }
+}
+
+group "org.abhijitsarkar.kotlin"
+version "1.0-SNAPSHOT"
+
+subprojects {
+    apply plugin: "kotlin"
+    apply plugin: "io.spring.dependency-management"
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "io.netty:netty-bom:$nettyVersion"
+        }
+    }
+
+    if (project.name != "common") {
+        dependencies {
+            compile project(":common")
+        }
+    }
+
+    dependencies {
+        compile(
+                "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
+                "io.netty:netty-buffer",
+                "io.netty:netty-handler",
+                "org.slf4j:slf4j-api:$slf4jVersion",
+                "ch.qos.logback:logback-classic:$logbackVersion"
+        )
+        testCompile(
+                "org.jetbrains.kotlin:kotlin-test:$kotlinVersion",
+                "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+        )
+    }
+
+    test {
+        ["io.netty.leakDetectionLevel", "io.netty.leakDetection.level"].each {
+            systemProperty(it, "PARANOID")
+        }
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+}
+
+project(":joke-proxy") {
+    repositories {
+        jcenter()
+    }
+
+    jar {
+        manifest {
+            attributes "Main-Class": "org.abhijitsarkar.kotlin.netty.joke.JokeProxyKt"
+        }
+
+        from {
+            configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+    }
+
+    dependencies {
+        compile(
+                "net.sf.jopt-simple:jopt-simple:$joptSimpleVersion",
+                "io.netty:netty-codec-http"
+        )
+    }
+}
