@@ -1,6 +1,6 @@
-rootProject.name = "learning-netty"
+rootProject.name = "netty-learning"
 include "common"
 include "echo-server"
 include "echo-client"
-include "joke-proxy"
+include "proxy"
 

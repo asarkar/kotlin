@@ -58,14 +58,14 @@ subprojects {
     }
 }
 
-project(":joke-proxy") {
+project(":proxy") {
     repositories {
         jcenter()
     }
 
     jar {
         manifest {
-            attributes "Main-Class": "org.abhijitsarkar.kotlin.netty.joke.JokeProxyKt"
+            attributes "Main-Class": "org.abhijitsarkar.kotlin.netty.proxy.ProxyKt"
         }
 
         from {

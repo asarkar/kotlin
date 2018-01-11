@@ -1,4 +1,4 @@
-package org.abhijitsarkar.kotlin.netty.joke
+package org.abhijitsarkar.kotlin.netty.proxy
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.Channel
@@ -29,8 +29,8 @@ internal fun Channel.hostPort() = this.remoteAddress().run {
     }
 }
 
-object JokeProxy {
-    private val LOGGER = loggerFor<JokeProxy>()
+object Proxy {
+    private val LOGGER = loggerFor<Proxy>()
 
     fun start(remoteAddress: SocketAddress, localAddress: SocketAddress) {
         val parentGroup = NioEventLoopGroup(1)
@@ -45,7 +45,7 @@ object JokeProxy {
                         with(ch.pipeline()) {
                             addLast(HttpServerCodec())
                             addLast(HttpObjectAggregator(8192, true))
-                            addLast(JokeProxyFrontendHandler(OutboundChannelFactory.outboundChannel(remoteAddress)))
+                            addLast(ProxyFrontendHandler(OutboundChannelFactory.outboundChannel(remoteAddress)))
                         }
                     }
                 })
@@ -56,8 +56,8 @@ object JokeProxy {
                 .also {
                     LOGGER.info(
                         "proxying: {} to {}.",
-                        it.channel().localAddress(),
-                        remoteAddress
+                        remoteAddress,
+                        it.channel().localAddress()
                     )
                     // block until ServerChannel is closed; this keep the server running
                     it.channel().closeFuture().sync()
@@ -68,15 +68,15 @@ object JokeProxy {
     }
 }
 
-fun main(args: Array<String>) {
+fun main(vararg args: String) { // vararg only works for function parameters
     val cmdLineArgs = CmdLineArgs(args)
-    JokeProxy.start(
+    Proxy.start(
         InetSocketAddress(cmdLineArgs.remoteHost, cmdLineArgs.remotePort),
         InetSocketAddress(cmdLineArgs.localPort)
     )
 }
 
-class CmdLineArgs(args: Array<String>) {
+class CmdLineArgs(args: Array<out String>) {
     private val opts: OptionSet
     private val localPortOpt: OptionSpec<Int>
     private val remotePortOpt: OptionSpec<Int>

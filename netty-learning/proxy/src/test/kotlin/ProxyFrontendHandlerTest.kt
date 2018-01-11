@@ -1,4 +1,4 @@
-package org.abhijitsarkar.kotlin.netty.joke
+package org.abhijitsarkar.kotlin.netty.proxy
 
 import io.netty.channel.embedded.EmbeddedChannel
 import io.netty.handler.codec.http.DefaultFullHttpRequest
@@ -9,13 +9,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class JokeProxyFrontendHandlerTest {
+class ProxyFrontendHandlerTest {
 
     @Test
     fun `should proxy request to outbound channel`() {
         val outboundChannel = EmbeddedChannel()
         val testChannel = EmbeddedChannel(
-            JokeProxyFrontendHandler({ outboundChannel })
+            ProxyFrontendHandler({ outboundChannel })
         )
 
         DefaultFullHttpRequest(

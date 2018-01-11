@@ -1,4 +1,4 @@
-package org.abhijitsarkar.kotlin.netty.joke
+package org.abhijitsarkar.kotlin.netty.proxy
 
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
@@ -22,7 +22,7 @@ object OutboundChannelFactory {
                     ch.pipeline().apply {
                             addLast(HttpClientCodec())
                             addLast(HttpObjectAggregator(8192, true))
-                            addLast(JokeProxyBackendHandler(inboundChannel))
+                            addLast(ProxyBackendHandler(inboundChannel))
                         }
                 }
             })
@@ -36,7 +36,7 @@ object OutboundChannelFactory {
                     )
                         inboundChannel.read()
                     else {
-                        JokeProxyFrontendHandler.LOGGER.error(f.cause().message, f.cause())
+                        ProxyFrontendHandler.LOGGER.error(f.cause().message, f.cause())
                         closeChannels(inboundChannel)
                     }
                 }

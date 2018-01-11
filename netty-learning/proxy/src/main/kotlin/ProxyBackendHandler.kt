@@ -1,4 +1,4 @@
-package org.abhijitsarkar.kotlin.netty.joke
+package org.abhijitsarkar.kotlin.netty.proxy
 
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
@@ -11,7 +11,7 @@ import org.abhijitsarkar.kotlin.netty.loggerFor
 /**
  * @author Abhijit Sarkar
  */
-class JokeProxyBackendHandler(private val outboundChannel: Channel) : SimpleChannelInboundHandler<FullHttpMessage>() {
+class ProxyBackendHandler(private val outboundChannel: Channel) : SimpleChannelInboundHandler<FullHttpMessage>() {
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         LOGGER.error(cause.message, cause)
         closeChannels(ctx.channel(), outboundChannel)
@@ -38,6 +38,6 @@ class JokeProxyBackendHandler(private val outboundChannel: Channel) : SimpleChan
     }
 
     companion object {
-        val LOGGER = loggerFor<JokeProxyBackendHandler>()
+        val LOGGER = loggerFor<ProxyBackendHandler>()
     }
 }

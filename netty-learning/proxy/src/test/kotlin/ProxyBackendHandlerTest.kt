@@ -1,4 +1,4 @@
-package org.abhijitsarkar.kotlin.netty.joke
+package org.abhijitsarkar.kotlin.netty.proxy
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.embedded.EmbeddedChannel
@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class JokeProxyBackendHandlerTest {
+class ProxyBackendHandlerTest {
 
     @Test
     fun `should echo response to outbound channel`() {
@@ -31,7 +31,7 @@ class JokeProxyBackendHandlerTest {
 
         val outboundChannel = EmbeddedChannel()
         val testChannel = EmbeddedChannel(
-            JokeProxyBackendHandler(outboundChannel)
+            ProxyBackendHandler(outboundChannel)
         )
 
         DefaultFullHttpResponse(

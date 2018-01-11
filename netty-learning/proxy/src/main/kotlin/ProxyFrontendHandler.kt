@@ -1,4 +1,4 @@
-package org.abhijitsarkar.kotlin.netty.joke
+package org.abhijitsarkar.kotlin.netty.proxy
 
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
@@ -11,7 +11,7 @@ import org.abhijitsarkar.kotlin.netty.loggerFor
 /**
  * @author Abhijit Sarkar
  */
-class JokeProxyFrontendHandler(
+class ProxyFrontendHandler(
     private val outboundChannelSupplier: (Channel) -> Channel
 ) : SimpleChannelInboundHandler<FullHttpMessage>() {
     private lateinit var outboundChannel: Channel
@@ -45,6 +45,6 @@ class JokeProxyFrontendHandler(
     }
 
     companion object {
-        val LOGGER = loggerFor<JokeProxyFrontendHandler>()
+        val LOGGER = loggerFor<ProxyFrontendHandler>()
     }
 }
