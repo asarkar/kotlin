@@ -3,4 +3,6 @@ include "common"
 include "echo-server"
 include "echo-client"
 include "proxy"
+include "gzip"
+include "echo-client-server-reactor"
 

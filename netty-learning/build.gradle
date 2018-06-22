@@ -29,19 +29,19 @@ subprojects {
 
     if (project.name != "common") {
         dependencies {
-            compile project(":common")
+            implementation(project(":common"))
         }
     }
 
     dependencies {
-        compile(
+        implementation(
                 "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
                 "io.netty:netty-buffer",
                 "io.netty:netty-handler",
                 "org.slf4j:slf4j-api:$slf4jVersion",
                 "ch.qos.logback:logback-classic:$logbackVersion"
         )
-        testCompile(
+        testImplementation(
                 "org.jetbrains.kotlin:kotlin-test:$kotlinVersion",
                 "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
         )
@@ -69,14 +69,31 @@ project(":proxy") {
         }
 
         from {
-            configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+            configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
         }
     }
 
     dependencies {
-        compile(
+        implementation(
                 "net.sf.jopt-simple:jopt-simple:$joptSimpleVersion",
                 "io.netty:netty-codec-http"
         )
+    }
+}
+
+project(":echo-client-server-reactor") {
+    dependencyManagement {
+        imports {
+            mavenBom "io.projectreactor:reactor-bom:$reactorBomVersion"
+        }
+    }
+    dependencies {
+        implementation("io.projectreactor.ipc:reactor-netty")
+    }
+}
+
+project(":gzip") {
+    dependencies {
+        testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion")
     }
 }
