@@ -1,0 +1,71 @@
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.3.41"
+    id "org.jetbrains.kotlin.kapt" version "1.3.41"
+    id "com.google.protobuf" version "0.8.10"
+    id "idea"
+}
+
+group = "org.asarkar"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(
+            "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
+            "io.grpc:grpc-protobuf:$grpcVersion",
+            "io.grpc:grpc-stub:$grpcVersion",
+            "io.grpc:grpc-netty:$grpcVersion",
+            "com.google.protobuf:protobuf-java:$protobufVersion"
+    )
+    testImplementation(
+            "org.junit.jupiter:junit-jupiter-api:$junitVersion",
+            "com.willowtreeapps.assertk:assertk-jvm:$assertkVersion"
+    )
+    testRuntimeOnly(
+            "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    )
+    if (JavaVersion.current().isJava9Compatible()) {
+        // Workaround for @javax.annotation.Generated
+        // see: https://github.com/grpc/grpc-java/issues/3633
+        implementation("javax.annotation:javax.annotation-api:$annotationApiVersion")
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events = ["passed", "skipped", "failed"]
+        exceptionFormat = "short"
+        showCauses = true
+        showExceptions = true
+        showStackTraces = true
+        displayGranularity = 2
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                grpc {}
+            }
+        }
+    }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}

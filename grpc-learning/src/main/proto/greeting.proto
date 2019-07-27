@@ -1,0 +1,15 @@
+syntax = "proto3";
+option java_multiple_files = true;
+package org.asarkar.greeting.model;
+
+message Greeting {
+    string name = 1;
+}
+
+message GreetRequest {
+    Greeting greeting = 1;
+}
+
+message GreetResponse {
+    string result = 1;
+}

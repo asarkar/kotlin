@@ -1,0 +1,14 @@
+syntax = "proto3";
+import "greeting.proto";
+option java_multiple_files = true;
+package org.asarkar.greeting;
+
+service GreetingService {
+    rpc Greet(org.asarkar.greeting.model.GreetRequest) returns (org.asarkar.greeting.model.GreetResponse) {};
+
+    rpc GreetManyTimes(org.asarkar.greeting.model.GreetRequest) returns (stream org.asarkar.greeting.model.GreetResponse) {};
+
+    rpc LongGreet(stream org.asarkar.greeting.model.GreetRequest) returns (org.asarkar.greeting.model.GreetResponse) {};
+
+    rpc GreetEveryone(stream org.asarkar.greeting.model.GreetRequest) returns (stream org.asarkar.greeting.model.GreetResponse) {};
+}
