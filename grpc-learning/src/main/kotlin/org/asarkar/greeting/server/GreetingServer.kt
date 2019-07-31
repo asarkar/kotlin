@@ -1,7 +1,10 @@
 package org.asarkar.greeting.server
 
 import io.grpc.Server
-import io.grpc.ServerBuilder
+import io.grpc.netty.NettyServerBuilder
+import org.asarkar.grpc.metrics.MonitoredExecutorService
+import org.asarkar.grpc.metrics.server.MonitoredEventLoopGroup
+import org.asarkar.grpc.metrics.server.MonitoringServerInterceptor
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
@@ -21,8 +24,27 @@ class GreetingServer {
             tmp
         }
 
-        server = ServerBuilder.forPort(port)
+        val bossEventLoopGroup = MonitoredEventLoopGroup.create("greeting-nio-boss-ELG")
+        val workerEventLoopGroup = MonitoredEventLoopGroup.create("greeting-nio-worker-ELG")
+
+        server = NettyServerBuilder.forPort(port)
             .addService(GreetingServiceImpl())
+            .intercept(MonitoringServerInterceptor())
+            .bossEventLoopGroup(bossEventLoopGroup)
+            .workerEventLoopGroup(workerEventLoopGroup)
+            // The Executor executes the callbacks of the rpc. This frees up the EventLoop to continue processing data
+            // on the connection. When a new message arrives from the network, it is read on the event loop, and then
+            // propagated up the stack to the executor. The executor takes the messages and passes them to the
+            // ServerCall.Listener that processes the data.
+            // By default, gRPC uses a cached thread pool. However it is strongly recommended you provide your own
+            // executor. The reason is that the default thread pool behaves badly under load, creating new threads
+            // when the rest are busy.
+            .executor(
+                MonitoredExecutorService.createBoundedThreadPool(
+                    "greeting",
+                    MonitoredExecutorService.Site.SERVER
+                )
+            )
             .build()
         server.start()
         server.awaitTermination()

@@ -18,7 +18,8 @@ dependencies {
             "io.grpc:grpc-protobuf:$grpcVersion",
             "io.grpc:grpc-stub:$grpcVersion",
             "io.grpc:grpc-netty:$grpcVersion",
-            "com.google.protobuf:protobuf-java:$protobufVersion"
+            "com.google.protobuf:protobuf-java:$protobufVersion",
+            "io.micrometer:micrometer-core:$micrometerVersion"
     )
     testImplementation(
             "org.junit.jupiter:junit-jupiter-api:$junitVersion",

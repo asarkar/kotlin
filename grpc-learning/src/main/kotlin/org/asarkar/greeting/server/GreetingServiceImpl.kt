@@ -1,5 +1,6 @@
 package org.asarkar.greeting.server
 
+import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import org.asarkar.greeting.GreetingServiceGrpc
 import org.asarkar.greeting.model.GreetRequest
@@ -7,12 +8,20 @@ import org.asarkar.greeting.model.GreetResponse
 
 class GreetingServiceImpl : GreetingServiceGrpc.GreetingServiceImplBase() {
     override fun greet(request: GreetRequest, responseObserver: StreamObserver<GreetResponse>) {
-        val response = GreetResponse.newBuilder()
-            .setResult("Hello, ${request.greeting.name}")
-            .build()
+        if (request.greeting.name.isBlank()) {
+            responseObserver.onError(
+                Status.INVALID_ARGUMENT
+                    .withDescription("You can do better!")
+                    .asRuntimeException()
+            )
+        } else {
+            val response = GreetResponse.newBuilder()
+                .setResult("Hello, ${request.greeting.name}")
+                .build()
 
-        responseObserver.onNext(response)
-        responseObserver.onCompleted()
+            responseObserver.onNext(response)
+            responseObserver.onCompleted()
+        }
     }
 
     override fun greetManyTimes(request: GreetRequest, responseObserver: StreamObserver<GreetResponse>) {

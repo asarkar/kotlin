@@ -7,19 +7,26 @@ import org.asarkar.greeting.GreetingServiceGrpc
 import org.asarkar.greeting.model.GreetRequest
 import org.asarkar.greeting.model.GreetResponse
 import org.asarkar.greeting.model.Greeting
+import org.asarkar.grpc.metrics.MonitoredExecutorService
+import org.asarkar.grpc.metrics.client.MonitoringClientInterceptor
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 class GreetingClient(port: Int) {
+    private val ec =
+        MonitoredExecutorService.createBoundedThreadPool("greeting-client", MonitoredExecutorService.Site.CLIENT)
     private val channel: ManagedChannel = ManagedChannelBuilder.forAddress("localhost", port)
+        .executor(ec)
         // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
         // needing certificates.
         .usePlaintext()
         .build()
     private val blockingStub = GreetingServiceGrpc.newBlockingStub(channel)
         .withDeadlineAfter(1, TimeUnit.SECONDS)
+        .withInterceptors(MonitoringClientInterceptor())
 
     fun shutdown() {
+        MonitoredExecutorService.destroy(ec)
         channel
             .shutdown()
             .awaitTermination(5, TimeUnit.SECONDS)
@@ -44,6 +51,7 @@ class GreetingClient(port: Int) {
         val latch = CountDownLatch(1)
         // streaming client call requires async stub
         val requestObserver = GreetingServiceGrpc.newStub(channel)
+            .withInterceptors(MonitoringClientInterceptor())
             .longGreet(object : StreamObserver<GreetResponse> {
                 override fun onNext(value: GreetResponse) {
                     assert(result.isEmpty()) { "Server sent more than one response" }
@@ -74,6 +82,7 @@ class GreetingClient(port: Int) {
         val latch = CountDownLatch(1)
         // streaming client call requires async stub
         val requestObserver = GreetingServiceGrpc.newStub(channel)
+            .withInterceptors(MonitoringClientInterceptor())
             .greetEveryone(object : StreamObserver<GreetResponse> {
                 override fun onNext(value: GreetResponse) {
                     result.add(value.result)
