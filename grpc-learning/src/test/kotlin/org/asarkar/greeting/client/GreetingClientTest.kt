@@ -71,6 +71,16 @@ class GreetingClientTest {
             .mapValues { it.value.firstOrNull() }
         val clientExecutorGauge = gauges["greeting-client"]
         assertThat(clientExecutorGauge).isNotNull()
+        val corePoolGauge = Micrometer.REGISTRY
+            .get("executor.corePool.size")
+            .gauge()
+        assertThat(corePoolGauge).isNotNull()
+        assertThat(corePoolGauge.value().toInt()).isEqualTo(1)
+        val maxPoolGauge = Micrometer.REGISTRY
+            .get("executor.maxPool.size")
+            .gauge()
+        assertThat(maxPoolGauge).isNotNull()
+        assertThat(maxPoolGauge.value().toInt()).isEqualTo(10)
         val serverExecutorGauge = gauges["greeting"]
         assertThat(serverExecutorGauge).isNotNull()
         assertThat(serverExecutorGauge!!.value().toInt()).isEqualTo(1)

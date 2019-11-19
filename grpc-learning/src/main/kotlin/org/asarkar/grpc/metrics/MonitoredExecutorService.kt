@@ -1,6 +1,9 @@
 package org.asarkar.grpc.metrics
 
+import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.Tags
+import io.micrometer.core.instrument.binder.BaseUnits
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.SynchronousQueue
@@ -15,13 +18,30 @@ object MonitoredExecutorService {
 
     fun createBoundedThreadPool(name: String, site: Site, maximumPoolSize: Int = 10): ExecutorService {
         return ThreadPoolExecutor(
-            0, maximumPoolSize,
+            1, maximumPoolSize,
             60L, TimeUnit.SECONDS,
             SynchronousQueue()
         )
             .apply {
-                ExecutorServiceMetrics(this, name, listOf(Tag.of("site", site.name)))
+                val siteTag = listOf(Tag.of("site", site.name))
+                ExecutorServiceMetrics(this, name, siteTag)
                     .bindTo(Micrometer.REGISTRY)
+
+                val tags = Tags.concat(siteTag, "name", name)
+                Gauge.builder("executor.corePool.size", this,
+                    { tpe: ThreadPoolExecutor -> tpe.corePoolSize.toDouble() }
+                )
+                    .tags(tags)
+                    .description("The core number of threads in the pool")
+                    .baseUnit(BaseUnits.THREADS)
+                    .register(Micrometer.REGISTRY)
+                Gauge.builder("executor.maxPool.size", this,
+                    { tpe: ThreadPoolExecutor -> tpe.maximumPoolSize.toDouble() }
+                )
+                    .tags(tags)
+                    .description("The maximum number of threads in the pool")
+                    .baseUnit(BaseUnits.THREADS)
+                    .register(Micrometer.REGISTRY)
             }
     }
 

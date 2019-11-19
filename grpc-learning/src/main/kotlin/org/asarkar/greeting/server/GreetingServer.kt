@@ -2,6 +2,7 @@ package org.asarkar.greeting.server
 
 import io.grpc.Server
 import io.grpc.netty.NettyServerBuilder
+import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.asarkar.grpc.metrics.MonitoredExecutorService
 import org.asarkar.grpc.metrics.server.MonitoredEventLoopGroup
 import org.asarkar.grpc.metrics.server.MonitoringServerInterceptor
@@ -27,9 +28,12 @@ class GreetingServer {
         val bossEventLoopGroup = MonitoredEventLoopGroup.create("greeting-nio-boss-ELG")
         val workerEventLoopGroup = MonitoredEventLoopGroup.create("greeting-nio-worker-ELG")
 
+        // A bunch of JVM metrics from io.micrometer.core.instrument.binder.jvm can also be registered
+        // See https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot-actuator-autoconfigure/src/main/java/org/springframework/boot/actuate/autoconfigure/metrics/JvmMetricsAutoConfiguration.java
         server = NettyServerBuilder.forPort(port)
             .addService(GreetingServiceImpl())
             .intercept(MonitoringServerInterceptor())
+            .channelType(NioServerSocketChannel::class.java)
             .bossEventLoopGroup(bossEventLoopGroup)
             .workerEventLoopGroup(workerEventLoopGroup)
             // The Executor executes the callbacks of the rpc. This frees up the EventLoop to continue processing data
