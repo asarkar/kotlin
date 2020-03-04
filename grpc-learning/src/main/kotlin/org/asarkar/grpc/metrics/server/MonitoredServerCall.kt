@@ -15,7 +15,6 @@ class MonitoredServerCall<Req, Resp>(
 ) :
     ForwardingServerCall.SimpleForwardingServerCall<Req, Resp>(delegate) {
     override fun close(status: Status, trailers: Metadata?) {
-        super.close(status, trailers)
         sample.stop(
             Micrometer.REGISTRY.timer(
                 "grpc.server.call",
@@ -25,5 +24,7 @@ class MonitoredServerCall<Req, Resp>(
                 "status", status.code.name
             )
         )
+
+        super.close(status, trailers)
     }
 }

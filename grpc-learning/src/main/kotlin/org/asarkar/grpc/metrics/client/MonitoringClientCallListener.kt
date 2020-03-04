@@ -15,7 +15,6 @@ class MonitoringClientCallListener<Resp>(
 ) :
     ForwardingClientCallListener.SimpleForwardingClientCallListener<Resp>(delegate) {
     override fun onClose(status: Status, trailers: Metadata?) {
-        super.onClose(status, trailers)
         sample.stop(
             Micrometer.REGISTRY.timer(
                 "grpc.client.call",
@@ -25,5 +24,7 @@ class MonitoringClientCallListener<Resp>(
                 "status", status.code.name
             )
         )
+
+        super.onClose(status, trailers)
     }
 }
